@@ -3,7 +3,7 @@
 Juego de navegador del club de corredores: el viernes a las 6:00 se sale a correr
 y se acaba en la churrería La Hormiga.
 
-**Versión 0.4.** Los doce gorilones con su aspecto y su personalidad (quedan algunos pedidos por confirmar).
+**Versión 0.4.** Los doce gorilones con su aspecto, su personalidad y lo que piden en La Hormiga.
 
 ## Cómo jugar
 
