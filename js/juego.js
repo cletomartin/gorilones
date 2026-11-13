@@ -395,7 +395,8 @@
     const campo = esTierra(J.scroll + 290);
     J.estado = 'parada';
     J.luz = false;
-    J.parada = { fase: 'aviso', t: 16, x: 296, sitio: campo ? 'matorral' : 'contenedor' };
+    // el matorral (o el contenedor) queda fijo en el sitio; el grupo se acerca andando
+    J.parada = { fase: 'aviso', t: 16, wx: J.scroll + 300, sitio: campo ? 'matorral' : 'contenedor' };
     const sitio = campo ? 'unos matorrales' : 'un contenedor';
     const inicio = {
       lineas: PARADA_TECNICA.inicio.lineas.map(([q, txt]) => [q, txt.replace('{sitio}', sitio)]),
@@ -409,31 +410,44 @@
     const jug = J.jugador;
     J.energia = limitar(J.energia + 8 * dt, 0, 100);
     J.pajara = J.pajara && J.energia < 35;
-    // andar entre el grupo
-    jug.mov = false;
+    // el grupo sigue andando despacio mientras espera
+    if (pa.fase !== 'aviso') {
+      J.km += (1 / SEG_KM) * 0.12 * dt;
+      J.scroll = J.km * PX_KM;
+    }
+    const sx = pa.wx - J.scroll;
+    for (const n of J.npcs) {
+      if (n.fuera) continue;
+      const obj = n.p.posicion + 10 * Math.sin(J.t * 0.25 + n.ruido);
+      n.x += Math.sign(obj - n.x) * Math.min(Math.abs(obj - n.x), 8 * dt);
+    }
+    // el jugador anda entre el grupo
     const dir = direccion();
-    if (dir.der) { jug.x += 30 * dt; jug.mov = true; }
-    if (dir.izq) { jug.x -= 30 * dt; jug.mov = true; }
+    if (dir.der) jug.x += 30 * dt;
+    if (dir.izq) jug.x -= 30 * dt;
     jug.x = limitar(jug.x, 24, 280);
     if (pa.fase === 'ida') {
       emi.fuera = true;
-      emi.mov = true;
+      emi.corre = true;
       emi.x += 70 * dt;
-      if (emi.x >= pa.x) {
+      if (emi.x >= sx) {
         emi.oculto = true;
-        emi.mov = false;
+        emi.corre = false;
         pa.fase = 'espera';
         aviso('Parada técnica. Aprovecha para charlar con alguien.');
       }
     } else if (pa.fase === 'espera') {
       pa.t -= dt;
-      if (pa.t <= 0) { pa.fase = 'vuelta'; emi.oculto = false; }
+      if (pa.t <= 0) { pa.fase = 'vuelta'; emi.oculto = false; emi.x = sx; }
     } else if (pa.fase === 'vuelta') {
-      emi.mov = true;
-      emi.x -= 60 * dt;
-      if (emi.x <= emi.p.posicion) {
+      // vuelve corriendo hasta su sitio (normalmente desde atrás, porque el grupo
+      // ha seguido andando y ha dejado atrás el matorral)
+      emi.corre = true;
+      const falta = emi.p.posicion - emi.x;
+      emi.x += Math.sign(falta) * Math.min(Math.abs(falta), 70 * dt);
+      if (Math.abs(falta) < 1) {
         emi.x = emi.p.posicion;
-        emi.mov = false;
+        emi.corre = false;
         emi.fuera = false;
         pa.fase = 'fin';
         abrirDialogo(PARADA_TECNICA.vuelta, 'emiliano', () => {
@@ -793,19 +807,24 @@
     }
     if (J.perro) Dibujo.perro(ctx, J.perro.x, Y_BASE + 15, J.t);
     if (J.parada) {
-      if (J.parada.sitio === 'matorral') Dibujo.matorral(ctx, J.parada.x + 4, p);
-      else Dibujo.contenedor(ctx, J.parada.x + 4, p);
+      const px = J.parada.wx - J.scroll + 4;
+      if (J.parada.sitio === 'matorral') Dibujo.matorral(ctx, px, p);
+      else Dibujo.contenedor(ctx, px, p);
     }
 
-    const quieto = J.estado === 'quedada' || J.estado === 'parada';
+    const quieto = J.estado === 'quedada';
+    // en la parada técnica el grupo va andando; quien corre (Emiliano) corre
+    const paseo = J.estado === 'parada' && J.parada && J.parada.fase !== 'aviso';
     const cadencia = J.duro ? 7 : J.sprint ? 14 : 10;
     const cerca = ['carrera', 'parada'].includes(J.estado) && !J.dialogo ? cercano() : null;
     const lista = [...J.npcs, J.jugador].sort((a, b) => a.carril - b.carril);
     for (const c of lista) {
       if (c.oculto) continue;
-      const parado = J.estado === 'titulo' || J.estado === 'parada' ? !c.mov : quieto;
+      let parado = J.estado === 'titulo' ? !c.mov : quieto;
+      if (J.estado === 'parada') parado = !paseo && !c.corre;
+      const andar = paseo && !c.corre;
       const cab = Dibujo.corredor(ctx, aspecto(c.id), c.x, Y_BASE + c.carril, J.t, {
-        z: c.z, quieto: parado, cadencia, fase: c.fase,
+        z: c.z, quieto: parado, cadencia: andar ? 5 : cadencia, fase: c.fase, andar,
       });
       c.cab = cab - Math.round(c.z);
       const top = cab - Math.round(c.z);

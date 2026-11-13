@@ -48,10 +48,13 @@ const Dibujo = (() => {
     c.fillRect(x - 4, Math.round(y) - 1, 9, 2);
 
     const fr = quieto ? 0 : Math.floor(t * (o.cadencia || 10) + (o.fase || 0) * 4) % 4;
-    const sw = quieto ? 0 : Math.round(2.5 * Math.sin(fr * Math.PI / 2));
-    const bote = quieto ? 0 : (fr % 2 === 1 ? -1 : 0);
-    const levA = !quieto && fr === 3 ? 2 : 0;   // pierna delantera
-    const levB = !quieto && fr === 1 ? 2 : 0;   // pierna trasera
+    // andando: zancada corta y sin rebote
+    const amplitud = o.andar ? 1.4 : 2.5;
+    const sw = quieto ? 0 : Math.round(amplitud * Math.sin(fr * Math.PI / 2));
+    const bote = quieto || o.andar ? 0 : (fr % 2 === 1 ? -1 : 0);
+    const lev = o.andar ? 1 : 2;
+    const levA = !quieto && fr === 3 ? lev : 0;   // pierna delantera
+    const levB = !quieto && fr === 1 ? lev : 0;   // pierna trasera
 
     const largo = 9 + (ap.altura || 0);
     const cadera = fy - largo + bote;
