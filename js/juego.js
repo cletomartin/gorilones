@@ -691,6 +691,8 @@
   }
 
   function actualizarHud() {
+    // los botones sobran en la portada, en el final y mientras hay diálogo
+    document.body.classList.toggle('sin-controles', !!J.dialogo || J.estado === 'titulo' || J.estado === 'final');
     const visible = ['carrera', 'quedada', 'parada'].includes(J.estado);
     $('#hud').hidden = !visible;
     if (!visible) return;
