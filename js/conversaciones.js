@@ -629,7 +629,6 @@ const EXCUSAS = [
   'tiene el gemelo cargado',
   'está de viaje',
   'tiene turno temprano',
-  'niños con fiebre',
   'cena de empresa ayer',
   'no ha contestado al grupo',
   'está de boda este finde',
