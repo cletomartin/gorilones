@@ -7,7 +7,11 @@ y se acaba en la churrería La Hormiga.
 
 ## Cómo jugar
 
-Abre `index.html` en el navegador. No hace falta instalar nada ni usar servidor.
+**Para jugar: https://cletomartin.github.io/gorilones/** (también desde el móvil).
+
+Para probarlo en local, abre `index.html` en el navegador.
+
+No hace falta instalar nada ni usar servidor.
 
 **En el móvil:** toca y mantén el dedo delante del jugador para adelantarte o detrás para
 quedarte atrás (el jugador sigue al dedo); desliza hacia arriba para saltar; toca al
