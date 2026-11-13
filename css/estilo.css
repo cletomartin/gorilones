@@ -380,9 +380,10 @@ body.sin-controles #controles { visibility: hidden; }
     padding: 12px 14px;
   }
   #retrato { width: 64px; height: 64px; }
-  #dlg-nombre { font-size: 20px; }
-  #dlg-texto { font-size: 19px; line-height: 1.2; }
-  #dlg-opciones button { font-size: 18px; padding: 8px 10px; }
+  #dialogo { font-size: 19px; }
+  #dlg-nombre { font-size: 1.05em; }
+  #dlg-texto { font-size: 1em; line-height: 1.2; }
+  #dlg-opciones button { font-size: .95em; padding: .4em .5em; }
   h1 { font-size: 1.9em; }
   #lema { font-size: 1em; }
   #circuitos { flex-direction: column; gap: 12px; align-items: center; }
@@ -433,6 +434,12 @@ body.sin-controles #controles { visibility: hidden; }
   #dialogo { max-height: 72%; }
   #pantalla-titulo .ayuda { display: none; }
 }
+
+/* ---------- sin barras de desplazamiento ----------
+   El diálogo ajusta la letra para caber entero; la pantalla final se
+   desplaza con el dedo, pero sin enseñar la barra. */
+#dialogo, #pantalla-final { scrollbar-width: none; }
+#dialogo::-webkit-scrollbar, #pantalla-final::-webkit-scrollbar { display: none; }
 
 /* ---------- pantallas táctiles: se mueve con el dedo ---------- */
 #juego { touch-action: none; }

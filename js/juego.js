@@ -169,6 +169,26 @@
     $('#dialogo').classList.toggle('narrador', q === 'narrador');
     $('#dlg-opciones').innerHTML = '';
     if (q !== 'narrador') Dibujo.retrato(ctxRetrato, aspecto(q));
+    ajustarDialogo();
+  }
+
+  // Si el mensaje (con sus respuestas) no cabe en la caja, baja la letra poco a
+  // poco hasta que entre entero. Se mide con el texto completo, no con lo que
+  // lleva escrito la máquina de escribir.
+  function ajustarDialogo() {
+    const d = J.dialogo;
+    if (!d) return;
+    const caja = $('#dialogo');
+    const texto = $('#dlg-texto');
+    const escrito = texto.textContent;
+    texto.textContent = d.texto;
+    caja.style.fontSize = '';
+    let tam = parseFloat(getComputedStyle(caja).fontSize);
+    while (caja.scrollHeight > caja.clientHeight + 1 && tam > 11) {
+      tam -= 0.5;
+      caja.style.fontSize = `${tam}px`;
+    }
+    texto.textContent = escrito;
   }
 
   function mostrarOpciones() {
@@ -183,6 +203,7 @@
       b.addEventListener('click', (e) => { e.stopPropagation(); elegir(i); });
       cont.appendChild(b);
     });
+    ajustarDialogo();
   }
 
   function elegir(i) {
