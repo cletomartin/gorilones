@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Gorilones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <main id="juego">
+    <canvas id="lienzo" width="320" height="180"></canvas>
+
+    <div id="hud" hidden>
+      <div class="energia"><span>Energía</span><div id="energia"><i></i></div></div>
+      <div id="km"></div>
+      <div id="tramo"></div>
+      <div id="hora"></div>
+    </div>
+
+    <div id="avisos"></div>
+
+    <div id="dialogo" hidden>
+      <canvas id="retrato" width="32" height="32"></canvas>
+      <div class="cuerpo">
+        <div id="dlg-nombre"></div>
+        <div id="dlg-texto"></div>
+        <div id="dlg-opciones"></div>
+      </div>
+    </div>
+
+    <section id="pantalla-titulo" class="panel">
+      <div id="intro-reloj">
+        <div class="dia">VIERNES</div>
+        <div class="digitos">5:45</div>
+        <div class="riiing">¡RIIIIING!</div>
+      </div>
+      <h1 id="logo">GORILONES</h1>
+      <p id="lema">Viernes, 6:00 de la mañana</p>
+      <p id="pulsa">Pulsa para empezar</p>
+      <div id="seleccion" hidden>
+        <p class="elige">Elige circuito:</p>
+        <div id="circuitos"></div>
+        <p class="ayuda">◀ ▶ colocarte en el grupo · ▲ saltar · Espacio: hablar / seguir · L: luz · 1-3: elegir</p>
+      </div>
+      <p class="version">Versión 0.4</p>
+    </section>
+
+    <section id="pantalla-final" class="panel" hidden></section>
+  </main>
+
+  <nav id="controles">
+    <button data-accion="izq" aria-label="Atrás">◀</button>
+    <button data-accion="der" aria-label="Adelante">▶</button>
+    <button data-accion="saltar" aria-label="Saltar">▲</button>
+    <button data-accion="luz" id="btn-luz" aria-label="Luz">LUZ</button>
+    <button data-accion="hablar" id="btn-hablar">HABLAR</button>
+  </nav>
+
+  <script src="js/personajes.js"></script>
+  <script src="js/conversaciones.js"></script>
+  <script src="js/circuitos.js"></script>
+  <script src="js/dibujo.js"></script>
+  <script src="js/juego.js"></script>
+</body>
+</html>
