@@ -24,6 +24,8 @@ en vertical o en horizontal.
   pero a Emiliano y a César no les hace ninguna gracia: mientras esté encendida gritan,
   pierdes energía y baja su amistad).
 - 1-3: elegir respuesta.
+- M o el botón 🔊: quitar o poner el sonido (los efectos se generan en el navegador, sin
+  archivos de audio; el sonido arranca al tocar la portada).
 
 La portada empieza con una animación; se pulsa cualquier tecla o se toca la pantalla para
 pasar a la elección de circuito.
@@ -44,6 +46,7 @@ te da una pájara y te quedas atrás. Al final hay un sprint y **el último paga
 | `js/conversaciones.js` | Conversaciones de cada uno, frases sueltas, gritos por la luz, excusas para faltar y la quedada |
 | `js/circuitos.js` | Los circuitos: distancia, tramos (paisaje), sitios por los que se pasa, tramos sin luz y sucesos del recorrido |
 | `js/dibujo.js` | El pixel art (generado con código, sin imágenes) |
+| `js/sonido.js` | Los efectos de sonido (generados con Web Audio, sin archivos) |
 | `js/juego.js` | La lógica del juego |
 
 ## Ficha de cada gorilón (para rellenar)

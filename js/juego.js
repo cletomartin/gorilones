@@ -53,7 +53,7 @@
       charlas: 0, charcosPisados: 0, tropiezos: 0, hechos: new Set(), tramo: -1,
       duro: false, sprint: false, charcos: [], sigCharco: 0.5 * PX_KM,
       perro: null, dialogo: null, orden: null,
-      luz: false, gritoT: 0, gritos: 0, introT: 0, menu: false,
+      luz: false, gritoT: 0, gritos: 0, introT: 0, menu: false, dormido: false,
       paradaKm: 99, paradaHecha: false, parada: null, animoT: 0,
     };
   }
@@ -128,7 +128,8 @@
   }
 
   // ------------------------------------------------------------- avisos
-  function aviso(texto, quien) {
+  function aviso(texto, quien, sonido = 'aviso') {
+    if (sonido) Sonido.toca(sonido);
     const d = document.createElement('div');
     d.className = 'aviso';
     if (quien && quien !== 'narrador') {
@@ -197,6 +198,7 @@
     d.vis = d.texto.length;
     const cont = $('#dlg-opciones');
     cont.innerHTML = '';
+    Sonido.toca('opciones');
     d.opciones.forEach((op, i) => {
       const b = document.createElement('button');
       b.textContent = `${i + 1}. ${op.texto}`;
@@ -210,6 +212,7 @@
     const d = J.dialogo;
     if (!d || d.fase !== 'opciones' || !d.opciones[i]) return;
     const op = d.opciones[i];
+    Sonido.toca('elegir');
     aplicar(op, d.quien);
     d.fase = 'respuesta';
     d.lineas = op.respuesta;
@@ -236,7 +239,7 @@
     for (const k of ids) {
       if (!(k in J.amistad)) continue;
       J.amistad[k] += n;
-      aviso(n > 0 ? `♥ +${n}` : `♥ ${n}`, k);
+      aviso(n > 0 ? `♥ +${n}` : `♥ ${n}`, k, n > 0 ? 'amistad' : 'amistadMenos');
     }
   }
 
@@ -259,6 +262,7 @@
   function mostrarTitulo(conIntro = true) {
     J = nuevoEstado(null);
     J.introT = conIntro ? 0 : 99;
+    J.dormido = conIntro;   // la portada espera a que toquen para «despertar»
     const orden = barajar(PERSONAJES);
     J.npcs = orden.map((p, i) => ({
       id: p.id, p, x: conIntro ? -20 : p.posicion, carril: p.carril, z: 0, vz: 0,
@@ -277,8 +281,10 @@
   }
 
   function animarTitulo(dt) {
-    J.introT += dt;
     const t = $('#pantalla-titulo');
+    t.classList.toggle('dormido', J.dormido);
+    if (J.dormido) return;
+    J.introT += dt;
     for (const [cls, desde] of FASES_INTRO) t.classList.toggle(cls, J.introT >= desde);
     for (const c of [...J.npcs, J.jugador]) {
       const obj = c === J.jugador ? 150 : c.p.posicion;
@@ -302,6 +308,11 @@
   }
 
   function pulsarTitulo() {
+    if (J.dormido) {
+      J.dormido = false;
+      Sonido.toca('despertador');
+      return;
+    }
     if (J.menu) return;
     if (J.introT < FIN_INTRO) saltarIntro();
     else abrirMenu();
@@ -364,6 +375,7 @@
   function saltar() {
     if (J.estado !== 'carrera' || J.dialogo || J.jugador.z > 0) return;
     J.jugador.vz = 150;
+    Sonido.toca('salto');
     J.energia = limitar(J.energia - 1, 0, 100);
   }
 
@@ -441,11 +453,11 @@
     if (J.estado !== 'carrera' || J.dialogo) return;
     J.luz = !J.luz;
     if (J.luz) {
-      aviso('Enciendes la frontal.');
+      aviso('Enciendes la frontal.', null, 'luz');
       J.gritoT = 0.7;
       J.gritos = 0;
     } else {
-      aviso('Apagas la frontal.');
+      aviso('Apagas la frontal.', null, 'luz');
       const q = quejicas();
       if (J.gritos > 0 && q.length) {
         const quien = azar(q);
@@ -461,7 +473,7 @@
     J.gritoT -= dt;
     if (J.gritoT <= 0) {
       const quien = q[J.gritos % q.length];
-      aviso(azar(GRITOS_LUZ[quien]), quien);
+      aviso(azar(GRITOS_LUZ[quien]), quien, 'grito');
       J.gritos++;
       J.gritoT = 1.8;
       if (J.gritos % 3 === 0) sumarAmistad(quien, -1);
@@ -472,8 +484,8 @@
     if (ev.requiere && ![].concat(ev.requiere).every(presente)) return;
     if (ev.accion === 'duro-on') J.duro = true;
     if (ev.accion === 'duro-off') J.duro = false;
-    if (ev.accion === 'sprint') J.sprint = true;
-    if (ev.accion === 'perro') J.perro = { x: 330, vida: 9 };
+    if (ev.accion === 'sprint') { J.sprint = true; Sonido.toca('silbato'); }
+    if (ev.accion === 'perro') { J.perro = { x: 330, vida: 9 }; Sonido.toca('ladrido'); }
     if (ev.aviso && presente(ev.aviso[0])) aviso(ev.aviso[1], ev.aviso[0]);
     if (ev.dialogo) abrirDialogo(ev.dialogo, ev.quien || 'narrador');
   }
@@ -486,6 +498,7 @@
 
   function terminar() {
     J.estado = 'final';
+    Sonido.toca('llegada');
     J.luz = false;
     teclas.izq = teclas.der = false;
     dedo.activo = false;
@@ -591,7 +604,7 @@
     const t = tramoEn(J.km);
     if (t !== J.tramo) {
       J.tramo = t;
-      if (t > 0) aviso(`📍 ${J.circ.tramos[t].nombre}`);
+      if (t > 0) aviso(`📍 ${J.circ.tramos[t].nombre}`, null, 'tramo');
     }
 
     // energía y posición en el grupo
@@ -612,7 +625,7 @@
     if (J.energia < 25 && J.animoT <= 0 && 'toty' in J.amistad) {
       J.animoT = 25;
       J.energia += 15;
-      aviso(azar(ANIMOS_TOTY), 'toty');
+      aviso(azar(ANIMOS_TOTY), 'toty', 'animo');
     }
     if (J.pajara) {
       jug.x -= 25 * dt;
@@ -621,7 +634,7 @@
     J.energia = limitar(J.energia, 0, 100);
     if (J.energia <= 0 && !J.pajara) {
       J.pajara = true;
-      aviso('¡Pájara! Te quedas atrás...');
+      aviso('¡Pájara! Te quedas atrás...', null, 'pajara');
     }
     jug.x = limitar(jug.x, 24, 296);
 
@@ -653,10 +666,12 @@
         const testigo = J.npcs.reduce((a, b) => (Math.abs(a.x - jug.x) < Math.abs(b.x - jug.x) ? a : b));
         if (c.tipo === 'charco') {
           J.charcosPisados++;
+          Sonido.toca('charco');
           J.energia = limitar(J.energia - 8, 0, 100);
           aviso(azar(FRASES_CHARCO), testigo.id);
         } else {
           J.tropiezos++;
+          Sonido.toca('tropiezo');
           const fuerte = c.tipo === 'bordillo';
           J.energia = limitar(J.energia - (fuerte ? 12 : 10), 0, 100);
           jug.x -= fuerte ? 22 : 14;
@@ -716,8 +731,11 @@
     const d = J.dialogo;
     if (d && d.vis < d.texto.length) d.vis = Math.min(d.texto.length, d.vis + dt * 55);
     if (d && Math.floor(d.vis) !== d.mostrado) {
+      const antes = d.mostrado;
       d.mostrado = Math.floor(d.vis);
       $('#dlg-texto').textContent = d.texto.slice(0, d.mostrado);
+      // pitido de máquina de escribir, una de cada tres letras
+      if (antes >= 0 && Math.floor(d.mostrado / 3) !== Math.floor(antes / 3) && d.texto[d.mostrado - 1] !== ' ') Sonido.toca('letra');
     }
     if (J.estado === 'titulo') animarTitulo(dt);
     if (J.estado === 'carrera' && !J.dialogo) correr(dt);
@@ -827,13 +845,20 @@
     b.className = 'circuito';
     b.textContent = c.nombre;
     b.title = `${c.nombre} (tecla ${i + 1})`;
-    b.addEventListener('click', (e) => { e.stopPropagation(); empezar(c); });
+    b.addEventListener('click', (e) => { e.stopPropagation(); Sonido.toca('menu'); empezar(c); });
     menu.appendChild(b);
   });
 
   // ------------------------------------------------------------ entrada
+  window.addEventListener('pointerdown', () => Sonido.iniciar(), true);
+  function pintarSonido() { $('#btn-sonido').textContent = Sonido.silencio ? '🔇' : '🔊'; }
+  pintarSonido();
+  $('#btn-sonido').addEventListener('click', (e) => { e.stopPropagation(); Sonido.alternar(); pintarSonido(); });
+  $('#btn-sonido').addEventListener('pointerdown', (e) => e.stopPropagation());
   window.addEventListener('keydown', (e) => {
+    Sonido.iniciar();
     const k = e.key;
+    if (k === 'm' || k === 'M') { Sonido.alternar(); pintarSonido(); return; }
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' '].includes(k)) e.preventDefault();
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') teclas.izq = true;
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') teclas.der = true;

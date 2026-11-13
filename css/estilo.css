@@ -446,3 +446,34 @@ body.sin-controles #controles { visibility: hidden; }
 @media (pointer: coarse) {
   #controles [data-accion="izq"], #controles [data-accion="der"] { display: none; }
 }
+
+/* ---------- sonido y despertador ---------- */
+#btn-sonido {
+  position: absolute;
+  right: 1.5%;
+  top: 11%;
+  z-index: 5;
+  width: 2.2em;
+  height: 2.2em;
+  font-size: 16px;
+  line-height: 1;
+  border: 2px solid #3a4775;
+  border-radius: 8px;
+  background: rgba(20, 26, 50, .75);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+/* en la portada dormida, el reloj quieto y el aviso de tocar */
+#intro-reloj .toca {
+  display: none;
+  margin-top: 1.2em;
+  font-size: .9em;
+  color: var(--suave);
+  animation: latido 1.4s ease-in-out infinite;
+}
+.dormido #intro-reloj .toca { display: block; }
+.dormido #intro-reloj .riiing { visibility: hidden; }
+.dormido #intro-reloj .digitos { animation: none; }
+@media (orientation: portrait) and (max-width: 760px) {
+  #btn-sonido { top: calc(100vw * 9 / 16 - 44px); bottom: auto; right: 8px; }
+}
