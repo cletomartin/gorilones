@@ -553,7 +553,8 @@ const QUEDADA = {
     ['agustito', '¡Cuántos somos hoy! No cabemos en La Hormiga.'],
     ['david', 'Agustito, que hoy viene una amiga a desayunar.'],
     ['agustito', 'Que no, David.', 'david'],
-    ['narrador', 'Con ◀ ▶ te colocas en el grupo (ir hacia delante cansa). Con ▲ saltas charcos, baches y bordillos. Acércate a alguien y pulsa HABLAR (espacio).'],
+    ['narrador', 'Con ◀ ▶ te colocas en el grupo (ir hacia delante cansa). Con ▲ saltas charcos, baches y bordillos. Acércate a alguien y pulsa HABLAR (espacio).', null, 'teclado'],
+    ['narrador', 'Toca delante o detrás de ti para moverte por el grupo (ir hacia delante cansa). Desliza el dedo hacia arriba para saltar charcos, baches y bordillos. Para hablar, toca al compañero que tiene el bocadillo «...».', null, 'tactil'],
   ],
 };
 
@@ -576,7 +577,7 @@ const PARADA_TECNICA = {
       ['cesar', '¿Otra vez? ¡Si es todos los viernes!'],
       ['narrador', 'Emiliano sale disparado hacia {sitio}. El grupo se para a esperarle.'],
       ['eduardo', 'Tranquilos, que en el cole a esto lo llamamos recreo.'],
-      ['narrador', 'Mientras esperáis, hablar no cansa. Muévete con ◀ ▶ y habla con quien quieras.'],
+      ['narrador', 'Mientras esperáis, hablar no cansa. Muévete por el grupo y habla con quien quieras.'],
     ],
   },
   vuelta: {

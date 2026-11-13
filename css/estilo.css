@@ -433,3 +433,9 @@ body.sin-controles #controles { visibility: hidden; }
   #dialogo { max-height: 72%; }
   #pantalla-titulo .ayuda { display: none; }
 }
+
+/* ---------- pantallas táctiles: se mueve con el dedo ---------- */
+#juego { touch-action: none; }
+@media (pointer: coarse) {
+  #controles [data-accion="izq"], #controles [data-accion="der"] { display: none; }
+}

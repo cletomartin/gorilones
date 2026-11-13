@@ -34,6 +34,16 @@
 
   let J;
   const teclas = { izq: false, der: false };
+  // control con el dedo: el jugador va hacia donde está el dedo
+  const TACTIL = window.matchMedia('(pointer: coarse)').matches;
+  const dedo = { activo: false, id: null, x: 0, y0: 0, saltado: false };
+  function direccion() {
+    const jx = J.jugador.x;
+    return {
+      der: teclas.der || (dedo.activo && dedo.x > jx + 4),
+      izq: teclas.izq || (dedo.activo && dedo.x < jx - 4),
+    };
+  }
 
   function nuevoEstado(circ) {
     return {
@@ -73,7 +83,9 @@
   // Quita de un diálogo lo que dicen los que no han venido.
   function filtrar(seq, quien) {
     // una línea [quien, texto, requiere] solo sale si «requiere» ha venido
-    const lineas = seq.lineas.map((l) => normal(l, quien)).filter(([q, , req]) => presente(q) && (!req || presente(req)));
+    // un cuarto elemento 'tactil' o 'teclado' limita la línea a ese tipo de pantalla
+    const lineas = seq.lineas.map((l) => normal(l, quien))
+      .filter(([q, , req, solo]) => presente(q) && (!req || presente(req)) && (!solo || solo === (TACTIL ? 'tactil' : 'teclado')));
     let opciones = (seq.opciones || [])
       .filter((op) => [].concat(op.requiere || []).every(presente))
       .map((op) => ({
@@ -366,8 +378,9 @@
     J.pajara = J.pajara && J.energia < 35;
     // andar entre el grupo
     jug.mov = false;
-    if (teclas.der) { jug.x += 30 * dt; jug.mov = true; }
-    if (teclas.izq) { jug.x -= 30 * dt; jug.mov = true; }
+    const dir = direccion();
+    if (dir.der) { jug.x += 30 * dt; jug.mov = true; }
+    if (dir.izq) { jug.x -= 30 * dt; jug.mov = true; }
     jug.x = limitar(jug.x, 24, 280);
     if (pa.fase === 'ida') {
       emi.fuera = true;
@@ -454,6 +467,7 @@
     J.estado = 'final';
     J.luz = false;
     teclas.izq = teclas.der = false;
+    dedo.activo = false;
     const todos = [...J.npcs.map((n) => ({ id: n.id, x: n.x })), { id: 'tu', x: J.jugador.x }];
     todos.sort((a, b) => b.x - a.x);
     J.orden = todos.map((o) => o.id);
@@ -560,10 +574,11 @@
     }
 
     // energía y posición en el grupo
-    if (teclas.der && !J.pajara && !(jug.tropiezo > 0)) {
+    const dir = direccion();
+    if (dir.der && !J.pajara && !(jug.tropiezo > 0)) {
       jug.x += 45 * dt;
       J.energia -= (J.sprint ? 11 : 9) * dt;
-    } else if (teclas.izq) {
+    } else if (dir.izq) {
       jug.x -= 45 * dt;
       J.energia += 5 * dt;
     } else {
@@ -838,11 +853,44 @@
     b.addEventListener('contextmenu', (e) => e.preventDefault());
   }
   $('#dialogo').addEventListener('click', avanzar);
+
+  // dedo sobre el juego: tocar delante/detrás para moverse, deslizar hacia
+  // arriba para saltar, tocar al compañero del bocadillo para hablar
+  const zona = $('#juego');
+  function aJuego(e) {
+    const r = lienzo.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * Dibujo.H };
+  }
+  zona.addEventListener('pointerdown', (e) => {
+    if (e.target !== lienzo && e.target !== zona) return;
+    if (!['carrera', 'parada'].includes(J.estado) || J.dialogo) return;
+    const p = aJuego(e);
+    const n = cercano();
+    if (n && p.y < Dibujo.H && Math.abs(p.x - n.x) < 12 && Math.abs(p.x - J.jugador.x) > 2) {
+      hablar();
+      return;
+    }
+    dedo.activo = true;
+    dedo.id = e.pointerId;
+    dedo.x = p.x;
+    dedo.y0 = e.clientY;
+    dedo.saltado = false;
+    try { zona.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
+    e.preventDefault();
+  });
+  zona.addEventListener('pointermove', (e) => {
+    if (!dedo.activo || e.pointerId !== dedo.id) return;
+    dedo.x = aJuego(e).x;
+    if (!dedo.saltado && dedo.y0 - e.clientY > 30) { saltar(); dedo.saltado = true; }
+  });
+  const soltarDedo = (e) => { if (e.pointerId === dedo.id) dedo.activo = false; };
+  zona.addEventListener('pointerup', soltarDedo);
+  zona.addEventListener('pointercancel', soltarDedo);
   $('#pantalla-titulo').addEventListener('click', pulsarTitulo);
 
   mostrarTitulo();
   requestAnimationFrame(bucle);
 
   // Para pruebas desde la consola del navegador.
-  window.gorilones = { estado: () => J, empezar, terminar, CIRCUITOS, paso: (dt) => actualizar(dt) };
+  window.gorilones = { dedo, estado: () => J, empezar, terminar, CIRCUITOS, paso: (dt) => actualizar(dt) };
 })();

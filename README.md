@@ -9,6 +9,13 @@ y se acaba en la churrería La Hormiga.
 
 Abre `index.html` en el navegador. No hace falta instalar nada ni usar servidor.
 
+**En el móvil:** toca y mantén el dedo delante del jugador para adelantarte o detrás para
+quedarte atrás (el jugador sigue al dedo); desliza hacia arriba para saltar; toca al
+compañero que tiene el bocadillo «...» para hablar; toca el diálogo para avanzar. Se juega
+en vertical o en horizontal.
+
+**Con teclado:**
+
 - ◀ ▶: colocarte en el grupo. Ir hacia delante gasta energía; ir hacia atrás la recupera.
 - ▲: saltar charcos, baches y bordillos (en los caminos de tierra, piedras). Pisar un charco
   cansa; tropezar con un bache, un bordillo o una piedra cansa más y te deja atrás.
